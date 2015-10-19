@@ -1,5 +1,8 @@
 //USER Table:
-create table userData
+
+CREATE EXTENSION Postgis;
+
+create table UserTable
 ( userId  INTEGER NOT NULL,
   userName VARCHAR(20) NOT NULL,
   password VARCHAR(32) NOT NULL,
@@ -7,8 +10,8 @@ create table userData
   phoneNumber CHAR(20) NOT NULL,
   CONSTRAINT user_pk PRIMARY KEY (userId)
 );
-INSERT INTO USER
-VALUES (1,'kirti','munmun','kirtiram@usc.edu',2134773932);
+INSERT INTO UserTable
+VALUES (1,'kirti','munmun','kirtiram@usc.edu','2134773932');
 
 //GEOFENCE Table
 create table Geofence
@@ -16,10 +19,11 @@ create table Geofence
 geofenceId INTEGER NOT NULL,
 geofenceName VARCHAR(20) NOT NULL,
 geofenceCreator INTEGER,
+center GEOGRAPHY(POINT, 4326),
 CONSTRAINT geo_pk PRIMARY KEY (geofenceId)
 );
-SELECT AddGeometryColumn('Geofence', 'center', '4326', 'POINT', 2);
-INSERT INTO Geofence(geofenceId , center) VALUES(2,'GEOFENCE1',1, ST_GeomFromText('POINT(-71.060316 48.432044)', 4326);
+
+INSERT INTO Geofence (geofenceId, geofenceName, geofenceCreator,center) VALUES (1,'GEO1','1', ST_GeographyFromText('SRID=4326;POINT(-110 30)') );
 
 // Events Table
 create table Events
@@ -28,7 +32,7 @@ eventId INTEGER NOT NULL,
 eventName VARCHAR(20) NOT NULL,
 sourceWeightage INTEGER,
 eventWebsiteURL VARCHAR(23),
+location GEOGRAPHY(POINT,4326),
 CONSTRAINT event_pk PRIMARY KEY (eventId)
 );
-SELECT ADDGeometryColumn('Events', 'location','4326','POINT',2);
-INSERT INTO Geofence(eventId , location) VALUES(2,'EVENT1',1,'jshcjksahf.com', ST_GeomFromText('POINT(-71.060316 48.432044)', 4326);
+INSERT INTO Events (eventId , eventName, location) VALUES(2,'EVENT1',ST_GeographyFromText('SRID=4326;POINT(-110 30)') );
