@@ -1,6 +1,7 @@
 from urllib2 import Request, urlopen, URLError
 import simplejson as json
 import time
+from datetime import datetime
 city = "los angeles"
 api_url = "http://api.eventful.com/json/events/search?"
 api_token = "96MwLvP5qM2g3Xfx"
@@ -20,15 +21,15 @@ class eventData(object):
         self.long=long
         self.lat=lat
         
-def collectingData():
-        full_data="{"+'"events"'+":["
-        print "---------------------------"
+def collectingDataEventFul():
+        full_data="{"+"\"events\""+":["
+#        print "---------------------------"
         for ecd in clean_events_data:
             try:
                 full_data+=ecd.to_JSON()
                 full_data+=","
             except TypeError:
-                print "-------------abc--------------"
+#                print "-------------abc--------------"
                 
                 print ecd.name
                 print ecd.description
@@ -39,24 +40,27 @@ def collectingData():
                 print ecd.lat
         
         full_data+="{}]}"
+        return full_data
         
 #        print full_data
-        print json.loads(full_data)
+#        return json.loads(full_data)
+         
 
 def checkNull(string):
     if(string):
         return string
     else:
-        return "none"
+        return "null"
     
 def encoding(string):
     if(string):
         return string.encode('utf-8')
     else:
-        return "none"
+        return "null"
 
+print str(datetime.now())
 request_url = api_url+"location="+city.replace(" ","+")+"&app_key="+api_token
-print request_url
+#print request_url
 try:
 	request = Request(request_url)
         response = urlopen(request)
@@ -81,7 +85,7 @@ try:
             response = urlopen(request)
             api_data = response.read()
             json_data = json.loads(api_data)
-            print json_data
+#            print json_data
             try:
                 page_size = int(json_data['page_size'])
             except:
@@ -90,28 +94,42 @@ try:
                 try:
                     name = encoding(checkNull(json_data['events']['event'][event]['title']))
                 except:
-                    name = encoding(checkNull("none"))
+                    name = encoding(checkNull("null"))
+                name = name.replace("\\",'');
+                name = name.replace("'",'');
+                name = name.replace("",'');
                 
                 try:
                     description = encoding(checkNull(json_data['events']['event'][event]['description']))
                 except:
                     description = encoding(checkNull("none")) 
-                description = description
+                    
+                description = description.replace("\\",'');
+                description = description.replace("'",'');
+                description = description.replace('"','');
+               
                 
                 try:
                     start_time =  json_data['events']['event'][event]['start_time']
                 except:
-                    start_time={}
+                    start_time="null"
                     
                 try:
-                    end_time =  json_data['events']['event'][event]['stop_time']
+                    end_time =  checkNull(json_data['events']['event'][event]['stop_time'])
+                    
+#                    if json_data['events']['event'][event]['stop_time'] == "None":
+#                        end_time = '"'+json_data['events']['event'][event]['stop_time']+'"'
+                    
                 except:
-                    end_time={}
+                    end_time="null"
+                    
+                    
+                    
                     
                 try:
                     logo_url =  json_data['events']['event'][event]['image']['medium']['url']
                 except:
-                    logo_url =  encoding(checkNull("none"))
+                    logo_url =  encoding(checkNull("null"))
                 
                 logo_url = logo_url.replace(" ","")
                 
@@ -124,18 +142,18 @@ try:
                 try:
                     long = encoding(checkNull(json_data['events']['event'][event]['longitude']))
                 except:
-                    long = encoding(checkNull("none")) 
+                    long = encoding(checkNull("null")) 
                     
                 try:
                     lat = encoding(checkNull(json_data['events']['event'][event]['latitude']))
                 except:
-                    lat = encoding(checkNull("none")) 
+                    lat = encoding(checkNull("null")) 
                     
                 clean_events_data.append(eventData(name,description,event_url,start_time,end_time,logo_url,long,lat))
         
-        collectingData()
+        collectingDataEventFul()
             
 except URLError, e:
     print 'No kittez. Got an error code:', e
-    collectingData()
+    collectingDataEventFul()
     

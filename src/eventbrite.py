@@ -25,18 +25,18 @@ def encoding(string):
     if(string):
         return string.encode('utf-8')
     else:
-        return "none"
+        return "null"
     
 def checkNull(string):
     if(string):
         return string
     else:
-        return "none"
+        return "null"
     
     
-def collectingData():
+def collectingDataEventBrite():
         full_data="{"+'"events"'+":["
-        print "---------------------------"
+#        print "---------------------------"
         for ecd in clean_events_data:
             try:
                 full_data+=ecd.to_JSON()
@@ -53,14 +53,15 @@ def collectingData():
                 print ecd.lat
         
         full_data+="{}]}"
+        return full_data
         
 #        print full_data
-        print json.loads(full_data)
+#        print json.loads(full_data)
     
 
 
 request_url = api_url+"venue.city="+city.replace(" ","+")+"&token="+api_token
-print request_url
+#print request_url
 
 
 
@@ -69,7 +70,7 @@ try:
         response = urlopen(request)
 	api_data = response.read()
         json_data = json.loads(api_data)
-	print json_data
+#	print json_data
         
         try:
             page_count = json_data['pagination']['page_count']
@@ -78,9 +79,9 @@ try:
             
         request_url+="&page="
         
-        for this_page in range(1,2):
+        for this_page in range(1,3):
             
-            print request_url+str(this_page)
+#            print request_url+str(this_page)
             if(this_page>0 and this_page%5==0):
                 time.sleep(3900)
                 
@@ -88,7 +89,7 @@ try:
             response = urlopen(request)
             api_data = response.read()
             json_data = json.loads(api_data)
-            print json_data
+#            print json_data
             try:
                 page_size = json_data['pagination']['page_size']
             except:
@@ -98,31 +99,38 @@ try:
                     name = encoding(checkNull(json_data['events'][event]['name']['text']))
                 except:
                     name = encoding(checkNull("none"))
+                name = name.replace("\\",'');
+                name = name.replace("'",'');
+                name = name.replace("",'');
                 try:
-                    description = encoding(checkNull(json_data['events'][event]['description']['text']))
+                    description = checkNull(json_data['events'][event]['description']['text'])
                 except:
-                    description = encoding(checkNull("none"))   
+                    description = checkNull("null")
+                description = description.replace("\\",'');
+                description = description.replace("'",'');
+                description = description.replace('"','');
+                
                 try:
                     start_time =  json_data['events'][event]['start']['local']
                 except:
-                    start_time={}
+                    start_time="null"
                 try:
                     end_time =  json_data['events'][event]['end']['local']
                 except:
-                    end_time = {}
+                    end_time = "null"
                 try:
                     logo_url =  encoding(checkNull(json_data['events'][event]['logo']['url']))
                 except:
-                    logo_url =  encoding(checkNull("none"))
+                    logo_url =  encoding(checkNull("null"))
                 try:
                     event_url =  encoding(checkNull(json_data['events'][event]['url']))
                 except:
-                    event_url =  encoding(checkNull("none"))    
+                    event_url =  encoding(checkNull("null"))    
                 long=0
                 lat=0
                 try : 
                     venue_request_url = venue_url+json_data['events'][event]['venue_id']+"/?token="+api_token
-                    print venue_request_url
+#                    print venue_request_url
                     request = Request(venue_request_url)
                     response = urlopen(request)
                     venue_data = response.read()
@@ -149,7 +157,7 @@ try:
                 
                 clean_events_data.append(eventData(name,description,event_url,start_time,end_time,logo_url,long,lat))
         
-        collectingData()
+        collectingDataEventBrite()
 
                 
                 
@@ -158,7 +166,7 @@ try:
 
 except URLError, e:
     print 'No kittez. Got an error code:', e
-    collectingData()
+    collectingDataEventBrite()
     
     
     
