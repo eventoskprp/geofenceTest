@@ -1,10 +1,14 @@
 from urllib2 import Request, urlopen, URLError
 import simplejson as json
-import time
+
+
+#api parameters
 city = "los angeles"
 api_url = "https://www.eventbriteapi.com/v3/events/search/?"
 venue_url = "https://www.eventbriteapi.com/v3/venues/"
 api_token = "P3T4I4MKKLCNVVOYVTRB"
+
+#data container which will collect the temporary data before JSON formation
 clean_events_data = []
 
 class eventData(object):
@@ -21,24 +25,27 @@ class eventData(object):
         self.long=long
         self.lat=lat
 
+#to remove non ASCII characters
 def encoding(string):
     if(string):
         return string.encode('utf-8')
     else:
         return "null"
-    
+
+#checking if a string is null in data api 
 def checkNull(string):
     if(string):
         return string
     else:
         return "null"
     
-    
+#JSON formation of data collected before any exception    
 def collectingDataEventBrite():
         full_data="{"+'"events"'+":["
-#        print "---------------------------"
+        
         for ecd in clean_events_data:
             try:
+                #converting list into json
                 full_data+=ecd.to_JSON()
                 full_data+=","
             except TypeError:
@@ -55,22 +62,19 @@ def collectingDataEventBrite():
         full_data+="{}]}"
         return full_data
         
-#        print full_data
-#        print json.loads(full_data)
-    
-
-
+#URL formation for initial page
 request_url = api_url+"venue.city="+city.replace(" ","+")+"&token="+api_token
-#print request_url
-
 
 
 try:
+        #requesting and reading data from API
 	request = Request(request_url)
         response = urlopen(request)
 	api_data = response.read()
+        
+        # JSON to list conversion
         json_data = json.loads(api_data)
-#	print json_data
+
         
         try:
             page_count = json_data['pagination']['page_count']
@@ -79,9 +83,10 @@ try:
             
         request_url+="&page="
         
-        for this_page in range(1,3):
+        #making GET call for each page
+        for this_page in range(1,page_count):
             
-#            print request_url+str(this_page)
+            # have to make script sleep for an hour as API KEY gets expire after some requests
             if(this_page>0 and this_page%5==0):
                 time.sleep(3900)
                 
@@ -89,7 +94,7 @@ try:
             response = urlopen(request)
             api_data = response.read()
             json_data = json.loads(api_data)
-#            print json_data
+
             try:
                 page_size = json_data['pagination']['page_size']
             except:
@@ -99,13 +104,18 @@ try:
                     name = encoding(checkNull(json_data['events'][event]['name']['text']))
                 except:
                     name = encoding(checkNull("none"))
+                
+                # replacing quotes and slashes from string because it creates problem while inserting data in DB | As of now
                 name = name.replace("\\",'');
                 name = name.replace("'",'');
                 name = name.replace("",'');
+                
+                
                 try:
                     description = checkNull(json_data['events'][event]['description']['text'])
                 except:
                     description = checkNull("null")
+                # replacing quotes and slashes from string because it creates problem while inserting data in DB | As of now
                 description = description.replace("\\",'');
                 description = description.replace("'",'');
                 description = description.replace('"','');
@@ -129,16 +139,14 @@ try:
                 long=0
                 lat=0
                 try : 
+                    # need to make call to venue API for each event to get LONG and LAT
                     venue_request_url = venue_url+json_data['events'][event]['venue_id']+"/?token="+api_token
-#                    print venue_request_url
+
                     request = Request(venue_request_url)
                     response = urlopen(request)
                     venue_data = response.read()
                     json_venue_data = json.loads(venue_data)
-#                    print json_venue_data
-#                    print json_venue_data['address']['address_1']
-#                    print json_venue_data['address']['longitude']
-#                    print json_venue_data['latitude']
+
                     try:
                         long=json_venue_data['longitude']
                     except:
@@ -152,20 +160,15 @@ try:
                     long="null"
                     lat="null"
                 
-                
-#                print event_url
-                
+                # adding each record one by one in class object
                 clean_events_data.append(eventData(name,description,event_url,start_time,end_time,logo_url,long,lat))
         
+        # if there is no error so far it will return all the acquired data
         collectingDataEventBrite()
-
-                
-                
-            
-        
 
 except URLError, e:
     print 'No kittez. Got an error code:', e
+    #if any error occurs It will return the data whatever has been collected safetly
     collectingDataEventBrite()
     
     
