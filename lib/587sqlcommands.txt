@@ -3,7 +3,7 @@
 CREATE EXTENSION Postgis;
 
 create table UserTable
-( userId  INTEGER NOT NULL,
+( userId  SERIAL,
   userName VARCHAR(20) NOT NULL,
   password VARCHAR(32) NOT NULL,
   email VARCHAR(320) NOT NULL,
@@ -16,9 +16,10 @@ VALUES (1,'kirti','munmun','kirtiram@usc.edu','2134773932');
 //GEOFENCE Table
 create table Geofence
 (
-geofenceId INTEGER NOT NULL,
+geofenceId SERIAL,
 geofenceName VARCHAR(20) NOT NULL,
-geofenceCreator INTEGER,
+userId INTEGER,
+radius INTEGER,
 center GEOGRAPHY(POINT, 4326),
 CONSTRAINT geo_pk PRIMARY KEY (geofenceId)
 );
