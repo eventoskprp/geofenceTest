@@ -19,7 +19,7 @@ create table Geofence
 geofenceId SERIAL,
 geofenceName VARCHAR(20) NOT NULL,
 userId INTEGER,
-radius INTEGER,
+radius REAL,
 center GEOGRAPHY(POINT, 4326),
 CONSTRAINT geo_pk PRIMARY KEY (geofenceId)
 );
