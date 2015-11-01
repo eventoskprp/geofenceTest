@@ -1,3 +1,5 @@
+API : http://eventosdataapi-env.elasticbeanstalk.com
+
 1.) user signup
 [POST]
 params:   /?name=apc&emailid=abc@gmail.com&phn=1234567&password=123&selector=1
