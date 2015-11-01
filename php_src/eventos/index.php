@@ -270,7 +270,7 @@ function displayevents($geofenceid, $db)
 			// var_dump($radius);
 
 			$sql = "SELECT * FROM events WHERE ST_DWithin(location, ST_SetSRID(ST_Point(" . $geometry['coordinates'][0] . "," . $geometry['coordinates'][1] . "), 4326)," . ($radius * 1609) . ")";
-			echo $sql;
+			// echo $sql;
 			$ret = pg_query($db, $sql);
 
 			// exit;
@@ -285,7 +285,7 @@ function displayevents($geofenceid, $db)
 				{
 				while ($row = pg_fetch_row($ret))
 					{
-					$events[] = array(
+					$events[] =
 						array(
 							'eventid' => $row[0],
 							'eventname' => $row[1],
@@ -294,7 +294,7 @@ function displayevents($geofenceid, $db)
 							'end_time' => $row[4],
 							'start_time' => $row[5],
 							'eventwebsiteurl' => $row[7],
-						)
+
 					);
 
 					// break;
@@ -355,7 +355,7 @@ function displaygeofence($userid, $db)
 function addgeofence($userid, $geofencename, $radius, $long, $lat, $db)
 	{
 	$sql = "INSERT INTO geofence (userid,geofencename,center,radius) VALUES ('" . $userid . "','" . $geofencename . "', ST_GeographyFromText('SRID=4326;POINT(" . $long . " " . $lat . ")'),'" . $radius . "')";
-	echo $sql;
+	// echo $sql;
 	$ret = pg_query($db, $sql);
 	if (!$ret)
 		{
