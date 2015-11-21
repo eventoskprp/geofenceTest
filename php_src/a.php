@@ -294,7 +294,7 @@ function displayevents($geofenceid, $db)
 							'end_time' => $row[4],
 							'start_time' => $row[5],
 							'eventwebsiteurl' => $row[7],
-						
+
 					);
 
 					// break;
@@ -354,7 +354,7 @@ function displaygeofence($userid, $db)
 
 function addgeofence($userid, $geofencename, $radius, $long, $lat, $db)
 	{
-	$sql = "INSERT INTO geofence (userid,geofencename,center,radius) VALUES ('" . $userid . "','" . $geofencename . "', ST_GeographyFromText('SRID=4326;POINT(" . $long . " " . $lat . ")'),'" . $radius . "')";
+	$sql = "INSERT INTO geofence (userid,geofencename,center,radius) VALUES ('" . $userid . "','" . $geofencename . "', ST_GeographyFromText('SRID=4326;POINT(" . $long . " " . $lat . ")'),'" . $radius . "') RETURNING geofenceid";
 	// echo $sql;
 	$ret = pg_query($db, $sql);
 	if (!$ret)
@@ -365,6 +365,10 @@ function addgeofence($userid, $geofencename, $radius, $long, $lat, $db)
 		}
 	  else
 		{
+			while ($row = pg_fetch_row($ret))
+				{
+					$result['geofenceId'] = $row[0];
+				}
 		$result['success'] = 'True';
 		echo json_encode($result);
 		}
