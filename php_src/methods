@@ -30,12 +30,12 @@ op : {"success":"True","geofences":[[{"center":{"type":"Point","coordinates":[-1
 
 5.) event listing
 [GET]
-params : /?geofenceid=geo&selector=5
+params : /?geofenceid=2&selector=5
 op:{events details}
 
 6.)geofence update
 [PUT]
-params : /?geofenceid=1&geofencename=geo&center=1&radius=12&selector=6
+params : /?geofenceid=1&geofencename=geo&long=12&lat=11&radius=12&selector=6
 op : {"success":"true"}
 
 7.)geo fence delete
