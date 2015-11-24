@@ -269,7 +269,7 @@ function displayevents($geofenceid, $db)
 			// echo $geometry['coordinates'][0];
 			// var_dump($radius);
 
-			$sql = "SELECT * FROM events WHERE ST_DWithin(location, ST_SetSRID(ST_Point(" . $geometry['coordinates'][0] . "," . $geometry['coordinates'][1] . "), 4326)," . ($radius * 1609) . ")";
+			$sql = "SELECT eventid,eventname,description,logo_url,end_time,start_time,eventwebsiteurl,ST_AsGeoJSON(location) FROM events WHERE ST_DWithin(location, ST_SetSRID(ST_Point(" . $geometry['coordinates'][0] . "," . $geometry['coordinates'][1] . "), 4326)," . ($radius * 1609) . ")";
 			// echo $sql;
 			$ret = pg_query($db, $sql);
 
@@ -285,6 +285,11 @@ function displayevents($geofenceid, $db)
 				{
 				while ($row = pg_fetch_row($ret))
 					{
+
+						$location = json_decode($row[7]);
+						$location = get_object_vars($location);
+
+
 					$events[] =
 						array(
 							'eventid' => $row[0],
@@ -293,13 +298,15 @@ function displayevents($geofenceid, $db)
 							'logo_url' => $row[3],
 							'end_time' => $row[4],
 							'start_time' => $row[5],
-							'eventwebsiteurl' => $row[7],
+							'eventwebsiteurl' => $row[6],
+							'long' => $location['coordinates'][0],
+							'lat' => $location['coordinates'][1],
+
 
 					);
 
-					// break;
-
 					}
+
 
 				$result['success'] = 'True';
 				if ($events)
@@ -354,7 +361,7 @@ function displaygeofence($userid, $db)
 
 function addgeofence($userid, $geofencename, $radius, $long, $lat, $db)
 	{
-	$sql = "INSERT INTO geofence (userid,geofencename,center,radius) VALUES ('" . $userid . "','" . $geofencename . "', ST_GeographyFromText('SRID=4326;POINT(" . $long . " " . $lat . ")'),'" . $radius . "')";
+	$sql = "INSERT INTO geofence (userid,geofencename,center,radius) VALUES ('" . $userid . "','" . $geofencename . "', ST_GeographyFromText('SRID=4326;POINT(" . $long . " " . $lat . ")'),'" . $radius . "') RETURNING geofenceid";
 	// echo $sql;
 	$ret = pg_query($db, $sql);
 	if (!$ret)
@@ -365,6 +372,10 @@ function addgeofence($userid, $geofencename, $radius, $long, $lat, $db)
 		}
 	  else
 		{
+			while ($row = pg_fetch_row($ret))
+				{
+					$result['geofenceId'] = $row[0];
+				}
 		$result['success'] = 'True';
 		echo json_encode($result);
 		}
