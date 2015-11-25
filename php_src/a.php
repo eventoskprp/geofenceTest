@@ -323,7 +323,7 @@ function displayevents($geofenceid, $db)
 
 function displaygeofence($userid, $db)
 	{
-	$sql = "SELECT ST_AsGeoJSON(center),geofenceid,radius FROM geofence where userid='" . $userid . "'";
+	$sql = "SELECT ST_AsGeoJSON(center),geofenceid,radius,geofencename FROM geofence where userid='" . $userid . "'";
 	$ret = pg_query($db, $sql);
 	if (!$ret)
 		{
@@ -343,11 +343,15 @@ function displaygeofence($userid, $db)
 			{
 			while ($row = pg_fetch_row($ret))
 				{
+					$center = json_decode($row[0]);
+					$center = get_object_vars($center);
 				$geofence[] = array(
 					array(
-						'center' => json_decode($row[0]) ,
+						'long' => $center['coordinates'][0] ,
+						'lat' => $center['coordinates'][1] ,
 						'geofenceid' => $row[1],
-						'radius' => $row[2]
+						'radius' => $row[2],
+						'geofencename' => $row[3]
 					)
 				);
 				}
